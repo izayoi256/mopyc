@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 gym = "*"
 chainerrl = "*"
+flask = "*"
+flask-wtf = "*"
 
 [requires]
 python_version = "3.7"

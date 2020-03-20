@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+
+{% set CELL_SIZE = 24 %}
+{% set CIRCLE_R = 10 %}
+{% set LEGAL_CIRCLE_R = 3 %}
+{% set FIRST_COLOR = '#FF4D00' %}
+{% set SECOND_COLOR = '#3CB371' %}
+{% set PLAYER_COLOR = FIRST_COLOR if game.is_first_turn else SECOND_COLOR %}
+
+{% block content %}
+<style type="text/css">
+    .layer {
+        border-collapse: collapse;
+    }
+    .layer td, .layer th {
+        border: 1px solid;
+        width: {{ CELL_SIZE }}px;
+        height: {{ CELL_SIZE }}px;
+    }
+    .layer svg {
+        display: block;
+    }
+    .layer button {
+        display: none;
+    }
+</style>
+<form method="post" action="{{ url_for('command') }}">
+    {{ form.csrf_token }}
+    {% for command in game.commands %}
+    <button type="submit" name="command" value="{{ command }}">{{ command.name }}</button>
+    {% endfor %}
+    <hr>
+    <pre>{% if game.first_wins %}WIN{% elif not game.is_over and game.is_first_turn %} =>{% else %}   {% endif %} <span
+            style="color: {{ FIRST_COLOR }};">&#11044;</span>: {{ game.first_score }} {{ game.first_pretty_moves }}</pre>
+    <pre>{% if game.second_wins %}WIN{% elif not game.is_over and game.is_second_turn %} =>{% else %}   {% endif %} <span
+            style="color: {{ SECOND_COLOR }};">&#11044;</span>: {{ game.second_score }} {{ game.second_pretty_moves }}</pre>
+    {% for layer in game.layers %}
+    <hr>
+    <table class="layer">
+        <thead>
+        <tr>
+            <th>
+                {{ layer.chr }}
+            </th>
+            {% for col_char in layer.col_chars %}
+            <th>
+                {{ col_char }}
+            </th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in layer.rows %}
+        <tr>
+            <th>
+                {{ row.chr }}
+            </th>
+            {% for cell in row.cells %}
+            <td>
+                <label>
+                    {% if cell.is_first() %}
+                    <svg width="{{ CELL_SIZE }}" height="{{ CELL_SIZE }}">
+                        <circle cx="{{ CELL_SIZE // 2 }}" cy="{{ CELL_SIZE // 2 }}" r="{{ CIRCLE_R }}"
+                                fill="{{ FIRST_COLOR }}"></circle>
+                    </svg>
+                    {% elif cell.is_second() %}
+                    <svg width="{{ CELL_SIZE }}" height="{{ CELL_SIZE }}">
+                        <circle cx="{{ CELL_SIZE // 2 }}" cy="{{ CELL_SIZE // 2 }}" r="{{ CIRCLE_R }}"
+                                fill="{{ SECOND_COLOR }}"></circle>
+                    </svg>
+                    {% elif cell.is_legal() %}
+                    <button type="submit" name="command" value="{{ cell.command }}"></button>
+                    <svg width="{{ CELL_SIZE }}" height="{{ CELL_SIZE }}">
+                        <circle cx="{{ CELL_SIZE // 2 }}" cy="{{ CELL_SIZE // 2 }}" r="{{ LEGAL_CIRCLE_R }}" fill="none"
+                                stroke="{{ PLAYER_COLOR }}" stroke-width="1"></circle>
+                    </svg>
+                    {% endif %}
+                </label>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</form>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<form method="post" action="{{ url_for('start') }}">
+    {{ form.csrf_token }}
+    <div>
+        {{ form.size.label }}:
+        {% for size in form.size %}
+            <label>
+                {{ size }}
+                {{ size.label }}
+            </label>
+        {% endfor %}
+    </div>
+    <button type="submit">Start</button>
+</form>
+{% endblock %}
